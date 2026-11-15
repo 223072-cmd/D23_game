@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>真剣衰弱 - 30秒で限界に挑む神経衰弱</title>
+  <title>真剣衰弱 - 45秒で限界に挑む神経衰弱</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* 3Dカードフリップ用のCSS */
@@ -101,6 +101,8 @@
     let matchedCount = 0;
     let timer = 45;
     let timerInterval = null;
+    let flipTimeout = null;
+    let resultTimeout = null;
     let isPlaying = false;
     let isProcessing = false; // アニメーション中の連続タップ防止
 
@@ -127,6 +129,8 @@
     // ゲームの初期化・リセット
     function resetGame() {
       clearInterval(timerInterval);
+      clearTimeout(flipTimeout);
+      clearTimeout(resultTimeout);
       timer = 45;
       matchedCount = 0;
       flippedCards = [];
@@ -162,6 +166,8 @@
 
     // ゲーム開始
     function startGame() {
+      if (isPlaying) return;
+      resetGame();
       overlayEl.classList.add('hidden');
       boardEl.classList.remove('hidden');
       restartBtn.classList.remove('hidden');
@@ -259,7 +265,7 @@
           }
         } else {
           // マッチ失敗：少し待ってから裏返す
-          setTimeout(() => {
+          flipTimeout = setTimeout(() => {
             flipCard(firstIndex, false);
             flipCard(secondIndex, false);
             flippedCards = [];
@@ -285,16 +291,18 @@
     // ゲーム終了処理 (勝利 / 失敗)
     function endGame(isWin) {
       clearInterval(timerInterval);
+      clearTimeout(flipTimeout);
+      clearTimeout(resultTimeout);
       isPlaying = false;
 
-      setTimeout(() => {
+      resultTimeout = setTimeout(() => {
         boardEl.classList.add('hidden');
         overlayEl.classList.remove('hidden');
 
         if (isWin) {
           overlayTitleEl.textContent = '🎉 成功！真剣マスター！';
           overlayTitleEl.className = 'text-2xl font-bold text-emerald-400 mb-2';
-          overlayMsgEl.textContent = `見事 ${45 - timer} 秒残して全16枚のカードを揃えました！`;
+          overlayMsgEl.textContent = `見事 ${timer} 秒残して全16枚のカードを揃えました！`;
           startBtn.textContent = 'もう一度挑戦する';
         } else {
           overlayTitleEl.textContent = '💀 失敗… タイムオーバー';
